@@ -1,0 +1,58 @@
+uint16_t showLED(){
+	uint16_t   res=0;
+	uint16_t bit0,bit1,bit2,bit3;
+	uint16_t number=rand();
+	bit0=number & 0x000F;
+	bit1=number & 0x00F0;
+	bit2=number & 0x0F00;
+	bit3=number & 0xF000;
+	
+	if((number & 0x000F)>7){
+		res |= 0b0000000000000001;
+		GPIOC->ODR=0b0000000000000001;
+		TIMs_Enable(2);
+		while((TIM2->SR & 0x0001) == 0);
+		TIMs_Disable(2);
+	}		
+	if((number & 0x00F0)>7){
+		res |= 0b0000000000000010;
+		GPIOC->ODR=0b0000000000000010;
+		TIMs_Enable(2);
+		while((TIM2->SR & 0x0001) == 0);
+		TIMs_Disable(2);
+	}
+	if((number & 0x0F00)>7){
+		res |= 0b0000000000000100;
+		GPIOC->ODR=0b0000000000000100;
+		TIMs_Enable(2);
+		while((TIM2->SR & 0x0001) == 0);
+		TIMs_Disable(2);
+	}
+	if((number & 0xF000)>7){
+		res |= 0b0000000000001000;
+		GPIOC->ODR=0b0000000000001000;
+		TIMs_Enable(2);
+		while((TIM2->SR & 0x0001) == 0);
+		TIMs_Disable(2);
+	}
+	GPIOC->ODR=0;
+	return res;
+}
+
+void compare(uint16_t *res){
+	int maskc; 
+	while((GPIOC->IDR&0x0400)==0);
+	TIMs_Enable(3);
+	while((TIM3->SR & 0x0001) == 0);
+  TIMs_Disable(3);
+	maskc=(GPIOC->IDR & 0b0000001111000000)>>6;
+	if(maskc==*res)
+		GPIOC->ODR=0x0020;
+	else
+		GPIOC->ODR=0x0010;
+	while((GPIOC->IDR&0x0400)==0);
+	GPIOC->ODR=*res;
+	TIMs_Enable(3);
+	while((TIM3->SR & 0x0001) == 0);
+	TIMs_Disable(3);
+}
